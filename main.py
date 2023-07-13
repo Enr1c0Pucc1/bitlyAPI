@@ -1,7 +1,9 @@
-import os, requests, argparse
+import requests
+import argparse
+import os
 from dotenv import load_dotenv
 from urllib.parse import urlparse
-load_dotenv()
+
 
 def is_bitlink(token, link):
     headers = {'Authorization': token}
@@ -26,20 +28,21 @@ def count_clicks(token, bitlink):
     headers = {'Authorization': token}
     parsed_link = urlparse(link)
     bitlink = f'{parsed_link.netloc}{parsed_link.path}'
-    url = 'https://api-ssl.bitly.com/v4/bitlinks/{bitlink}/clicks/summary'.format(
-        bitlink=bitlink)
+    url = f'https://api-ssl.bitly.com/v4/bitlinks/{bitlink}/clicks/summary'
     response = requests.get(url, headers=headers)
     response.raise_for_status()
     return response.json()['total_clicks']
 
+
 if __name__ == '__main__':
+    load_dotenv()
     bitly_token = os.environ['BITLY_TOKEN']
-    parser = argparse.ArgumentParser(description='Программа для сокращения ссылок')
+    description = 'Программа для сокращения ссылок'
+    parser = argparse.ArgumentParser(description=description)
     parser.add_argument('url', help='Ссылка для сокращения')
 
     args = parser.parse_args()
     link = args.url
-    
     try:
         if is_bitlink(bitly_token, link):
             clicks_total = count_clicks(bitly_token, link)
